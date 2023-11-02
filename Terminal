@@ -14,11 +14,13 @@ public class Terminal {
         parser = new Parser();
     }
     
-    public void pwd() { 
+    //Print working directory
+    public void pwd() {  
         String current_Directory = System.getProperty("user.dir");
         System.out.println("Current directory: " + current_Directory);
     }
 
+   //Print any text that follows the command
    public void echo(String[] args) {
         if (args.length == 1) {
             System.out.println(args[0]);
@@ -27,6 +29,7 @@ public class Terminal {
         }
     }
 
+   // list directories and files
    public void ls() {
         File current_Directory = new File(System.getProperty("user.dir"));
         File[] contents = current_Directory.listFiles();
@@ -38,6 +41,7 @@ public class Terminal {
         }
     }
 
+   // navigate through directories
    public void cd(String[] args) {
         if (args.length == 0) {                 // Case 1: cd with no arguments changes the current directory to the home directory
             String userHome = System.getProperty("user.home");
@@ -66,16 +70,17 @@ public class Terminal {
             System.out.println("Usage: cd [directory]");
         }
     }
-
+ 
+  //displays an enumerated list with the commands you’ve used in the past
   public void history() {
         if (command_History.isEmpty()) {
             System.out.println("Command history is empty.");
             return;
         }
 
-        System.out.println("Command History:");
-        for (int i = 0; i < command_History.size(); i++) {
-            System.out.println((i + 1) + " " + command_History.get(i));
+        System.out.println("Command History is:");
+        for (int h = 0; h < command_History.size(); h++) {
+            System.out.println((h + 1) + " " + command_History.get(h));
         }
     }
 
@@ -114,23 +119,24 @@ public class Terminal {
            command_History.add(commandName); // Add the executed command to the history
     }
 
-  public static void main(String[] args) {
+  // The main function to execute program
+  public static void main(String[] args) { 
         Terminal terminal = new Terminal();
-        System.out.println("choose the command you need: ");
+        System.out.println("Choose The Command you need: ");
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
             System.out.print("> ");
-            String input = scanner.nextLine();
+            String input = scanner.nextLine(); //Enter command as an input
 
-            if (input.equals("exit")) {
+            if (input.equals("exit")) {        // if user enter or choose exit
                 break;
             }
 
-            if (terminal.parser.parse(input)) {
+            if (terminal.parser.parse(input)) {  // if user enter or choose anything except exit .
                 terminal.chooseCommand();
             } else {
-                System.out.println("Invalid input");
+                System.out.println("Invalid input"); //if user choose or enter invalid command
             }
         }
     }
