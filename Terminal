@@ -11,7 +11,55 @@ public class Terminal {
         parser = new Parser();
     }
     
-    public void pwd() {
+    public void pwd() { 
         String current_Directory = System.getProperty("user.dir");
         System.out.println("Current directory: " + current_Directory);
+    }
+
+   public void echo(String[] args) {
+        if (args.length == 1) {
+            System.out.println(args[0]);
+        } else {
+            System.out.println("Usage: echo <message>");
+        }
+    }
+
+   public void ls() {
+        File current_Directory = new File(System.getProperty("user.dir"));
+        File[] contents = current_Directory.listFiles();
+        if (contents != null) {
+            Arrays.sort(contents); // Sort files and directories alphabetically
+            for (File file : contents) {
+                System.out.println(file.getName());
+            }
+        }
+    }
+
+  public void cd(String[] args) {
+        if (args.length == 0) {                 // Case 1: cd with no arguments changes the current directory to the home directory
+            String userHome = System.getProperty("user.home");
+            System.setProperty("user.dir", userHome);
+        } else if (args.length == 1) {
+            if (args[0].equals("..")) { // Case 2: cd with ".." argument changes the current directory to the previous directory
+                String currentDir = System.getProperty("user.dir");
+                File current_File = new File(currentDir);
+                String parent_Directory = current_File.getParent();
+                if (parent_Directory != null) {
+                    System.setProperty("user.dir", parent_Directory);
+                } else {
+                    System.out.println("Already at the root directory.");
+                }
+            } else {                          // Case 3: cd with a path argument changes the current directory to the specified path
+                String new_Path = args[0];
+                File new_Directory = new File(new_Path);
+
+                if (new_Directory.isDirectory()) {
+                    System.setProperty("user.dir", new_Directory.getAbsolutePath());
+                } else {
+                    System.out.println("Directory not found: " + new_Path);
+                }
+            }
+        } else {
+            System.out.println("Usage: cd [directory]");
+        }
     }
