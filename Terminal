@@ -3,9 +3,12 @@ package com.mycompany.terminal;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Terminal {
     private Parser parser ;
+    private List<String> command_History = new ArrayList<>();
 
     public Terminal() {
         parser = new Parser();
@@ -64,6 +67,18 @@ public class Terminal {
         }
     }
 
+  public void history() {
+        if (command_History.isEmpty()) {
+            System.out.println("Command history is empty.");
+            return;
+        }
+
+        System.out.println("Command History:");
+        for (int i = 0; i < command_History.size(); i++) {
+            System.out.println((i + 1) + " " + command_History.get(i));
+        }
+    }
+
   public void chooseCommand() {
         String commandName = parser.getCommandName();
         String[] args = parser.getArgs();
@@ -84,14 +99,19 @@ public class Terminal {
             case "echo":
                 echo(args);
                 break;    
-            case "cp":    
-                break;    
+            case "cp":  
+                //cp();  
+                break;   
+            case "history":
+                history();
+                break; 
             case "exit":
                 System.exit(0);
                 break;
             default:
                 System.out.println("Command not valid");
         }
+           command_History.add(commandName); // Add the executed command to the history
     }
 
   public static void main(String[] args) {
