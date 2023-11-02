@@ -35,7 +35,7 @@ public class Terminal {
         }
     }
 
-  public void cd(String[] args) {
+   public void cd(String[] args) {
         if (args.length == 0) {                 // Case 1: cd with no arguments changes the current directory to the home directory
             String userHome = System.getProperty("user.home");
             System.setProperty("user.dir", userHome);
@@ -63,3 +63,55 @@ public class Terminal {
             System.out.println("Usage: cd [directory]");
         }
     }
+
+  public void chooseCommand() {
+        String commandName = parser.getCommandName();
+        String[] args = parser.getArgs();
+       
+        switch (commandName) {
+            case "pwd":
+                pwd();
+                break;
+            case "cd":
+                cd(args);
+                break;
+            case "ls":
+                ls();
+                break;
+            case "ls -r":
+                //listFilesReverse();
+                break;
+            case "echo":
+                echo(args);
+                break;    
+            case "cp":    
+                break;    
+            case "exit":
+                System.exit(0);
+                break;
+            default:
+                System.out.println("Command not valid");
+        }
+    }
+
+  public static void main(String[] args) {
+        Terminal terminal = new Terminal();
+        System.out.println("choose the command you need: ");
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.print("> ");
+            String input = scanner.nextLine();
+
+            if (input.equals("exit")) {
+                break;
+            }
+
+            if (terminal.parser.parse(input)) {
+                terminal.chooseCommand();
+            } else {
+                System.out.println("Invalid input");
+            }
+        }
+    }
+}
