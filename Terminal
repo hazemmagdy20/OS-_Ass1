@@ -1,0 +1,17 @@
+package com.mycompany.terminal;
+
+import java.util.Arrays;
+import java.util.Scanner;
+import java.io.File;
+
+public class Terminal {
+    private Parser parser ;
+
+    public Terminal() {
+        parser = new Parser();
+    }
+    
+    public void pwd() {
+        String current_Directory = System.getProperty("user.dir");
+        System.out.println("Current directory: " + current_Directory);
+    }
