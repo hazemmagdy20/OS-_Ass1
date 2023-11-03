@@ -1,10 +1,16 @@
 package com.mycompany.terminal;
-
 import java.io.*;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
+
+
+
 
 public class Terminal {
     private Parser parser;
@@ -71,6 +77,33 @@ public class Terminal {
         }
     }
 
+    
+    // list directories and files reverse
+    public void ls_r() {
+        File current_Directory = new File(System.getProperty("user.dir"));
+        File[] contents = current_Directory.listFiles();
+        if (contents != null) {
+            Arrays.sort(contents); // Sort files and directories alphabetically
+            for (int i = contents.length - 1; i >= 0; i--) {
+                System.out.println(contents[i].getName());
+            }
+        }
+    }
+    
+        //Takes 2 arguments, both are files and copies the first onto the second.
+    public void cp(String [] files) {
+        try (FileInputStream sourceStream = new FileInputStream(files[0]);
+                FileOutputStream targetStream = new FileOutputStream(files[1])) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = sourceStream.read(buffer)) != -1) {
+                targetStream.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     //takes a name of a file and removes it from the current directory
     public void rm(String[] args) {
         String FileName = args[0];
@@ -170,6 +203,54 @@ public class Terminal {
         System.out.println(lineCount + " " + wordCount + " " + charCount + " " + filename);
     }
 
+
+
+    //function touch
+    public void touch(String[] filePath){
+        File file = new File(filePath[0]);
+        try{
+            if (file.createNewFile()) {
+                System.out.println("File created successfully: " + filePath);
+            } else {
+                System.out.println("File already exists: " + filePath);
+            }
+        } catch(IOException e){
+            e.printStackTrace();
+            System.err.println("Failed to create the file: " + filePath);
+        }
+    }
+
+
+    //make directory
+    public void mkdir(String directoryNames[]){
+        for(String directoryName : directoryNames){
+            File directory = new File(directoryName);
+            
+            //if user writr the full path of the directory
+            if (directory.isAbsolute()) {
+                if (directory.mkdirs()) {
+                    System.out.println("Directory created successfully: " + directoryName);
+                } else {
+                    System.out.println("Failed to create the directory: " + directoryName);
+                }
+            }
+
+            //if user write the name of directory only create it in the currently path
+            else {
+                File currentDir = new File(System.getProperty("user.dir"));
+                File newDirectory = new File(currentDir, directoryName);
+
+                if (newDirectory.mkdirs()) {
+                    System.out.println("Directory created successfully: " + newDirectory.getAbsolutePath());
+                } else {
+                    System.out.println("Failed to create the directory: " + newDirectory.getAbsolutePath());
+                }
+            }
+
+        }
+    }
+
+
     //displays an enumerated list with the commands you’ve used in the past
     public void history() {
         if (command_History.isEmpty()) {
@@ -198,22 +279,30 @@ public class Terminal {
             case "ls":
                 ls();
                 break;
-            case "ls -r":
-                //listFilesReverse();
-                break;
             case "echo":
                 echo(args);
-                break;
-            case "cp":
-                //cp();
                 break;
             case "rm":
                 rm(args);
                 break;
             case "cat":
                 cat(args);
+                break;
             case "wc":
                 wc(args);
+                break;
+            case "cp":  
+                cp(args);
+                break;   
+            case "touch":
+                touch(args);
+                break;
+            case "mkdir":
+                mkdir(args);
+                break;
+            case "ls-r":
+                ls_r();
+                break;
             case "history":
                 history();
                 break;
@@ -248,4 +337,3 @@ public class Terminal {
         }
     }
 }
-
