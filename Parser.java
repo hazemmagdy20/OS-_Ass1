@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class Parser {
     private String command_line ;
     private String[] args ;
-    
+
     public boolean parse(String input) {
         String[] tokens = input.trim().split(" "); // Split the input string into an array of tokens using space as the delimiter
         if (tokens.length > 0) {
@@ -23,5 +23,5 @@ public class Parser {
     public String[] getArgs() {       //get arguments
         return args;
     }
-    
+
 }
