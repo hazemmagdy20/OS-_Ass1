@@ -1,27 +1,31 @@
 package com.mycompany.terminal;
 
-import java.io.*;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
+
 
 public class Terminal {
-    private Parser parser;
+    private Parser parser ;
     private List<String> command_History = new ArrayList<>();
 
     public Terminal() {
         parser = new Parser();
     }
-
+    
     //Print working directory
-    public void pwd() {
+    public void pwd() {  
         String current_Directory = System.getProperty("user.dir");
         System.out.println("Current directory: " + current_Directory);
     }
 
-    //Print any text that follows the command
-    public void echo(String[] args) {
+   //Print any text that follows the command
+   public void echo(String[] args) {
         if (args.length == 1) {
             System.out.println(args[0]);
         } else {
@@ -29,8 +33,8 @@ public class Terminal {
         }
     }
 
-    // list directories and files
-    public void ls() {
+   // list directories and files
+   public void ls() {
         File current_Directory = new File(System.getProperty("user.dir"));
         File[] contents = current_Directory.listFiles();
         if (contents != null) {
@@ -41,8 +45,58 @@ public class Terminal {
         }
     }
 
-    // navigate through directories
-    public void cd(String[] args) {
+    // list directories and files reverse
+    public void ls_r() {
+        File current_Directory = new File(System.getProperty("user.dir"));
+        File[] contents = current_Directory.listFiles();
+        if (contents != null) {
+            Arrays.sort(contents); // Sort files and directories alphabetically
+            for (int i = contents.length - 1; i >= 0; i--) {
+                System.out.println(contents[i].getName());
+            }
+        }
+    }
+
+    //Takes 2 arguments, both are files and copies the first onto the second.
+    public void cp(String [] files) {
+        try (FileInputStream sourceStream = new FileInputStream(files[0]);
+             FileOutputStream targetStream = new FileOutputStream(files[1])) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = sourceStream.read(buffer)) != -1) {
+                targetStream.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    //Takes 2 arguments, both are directories (empty or not) and copies 
+    //the first directory (with all its content) into the second one.
+    //not compliter
+    public void cp_r(){
+
+    }
+
+
+    public void touch(String[] filePath){
+        File file = new File(filePath[0]);
+        try{
+            if (file.createNewFile()) {
+                System.out.println("File created successfully: " + filePath);
+            } else {
+                System.out.println("File already exists: " + filePath);
+            }
+        } catch(IOException e){
+            e.printStackTrace();
+            System.err.println("Failed to create the file: " + filePath);
+        }
+    }
+
+
+   // navigate through directories
+   public void cd(String[] args) {
         if (args.length == 0) {                 // Case 1: cd with no arguments changes the current directory to the home directory
             String userHome = System.getProperty("user.home");
             System.setProperty("user.dir", userHome);
@@ -71,107 +125,38 @@ public class Terminal {
         }
     }
 
-    //takes a name of a file and removes it from the current directory
-    public void rm(String[] args) {
-        String FileName = args[0];
-        File file = new File(FileName);
 
-        if (file.exists()) {
-            file.delete();
-            System.out.println("File deleted!");
-        } else {
-            System.out.println("File " + FileName + " does not exist.");
-        }
-    }
 
-    //prints files contents or concatenate two files
-    public void cat(String[] args) throws IOException {
-        String FileName1, FileName2, ResultFile;
-
-        if (args.length == 0) {
-            System.out.println("These files do not exist");
-        }
-        if (args.length == 1) {
-            FileName1 = args[0];
-            File F = new File(FileName1);
-
-            if (F.exists()) {
-                try {
-                    BufferedReader reader = new BufferedReader(new FileReader(FileName1));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println(line);
-                    }
-                    reader.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+    public void mkdir(String directoryNames[]){
+        for(String directoryName : directoryNames){
+            File directory = new File(directoryName);
+            
+            //if user writr the full path of the directory
+            if (directory.isAbsolute()) {
+                if (directory.mkdirs()) {
+                    System.out.println("Directory created successfully: " + directoryName);
+                } else {
+                    System.out.println("Failed to create the directory: " + directoryName);
                 }
-            } else System.out.println("File does not exist");
-        }
-        if (args.length > 1) {
-            FileName1 = args[0];
-            FileName2 = args[1];
-            ResultFile = "Result.txt";
+            }
 
-            File F1 = new File(FileName1);
-            File F2 = new File(FileName2);
+            //if user write the name of directory only create it in the currently path
+            else {
+                File currentDir = new File(System.getProperty("user.dir"));
+                File newDirectory = new File(currentDir, directoryName);
 
-            if (F1.exists() && F2.exists()) {
-                File NewFile = new File(ResultFile);
-                NewFile.createNewFile();
-                try {
-                    BufferedReader reader1 = new BufferedReader(new FileReader(FileName1));
-                    BufferedReader reader2 = new BufferedReader(new FileReader(FileName2));
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(ResultFile, true));
-
-                    String line;
-                    while ((line = reader1.readLine()) != null) {
-                        writer.write(line);
-                        writer.newLine();
-                    }
-                    while ((line = reader2.readLine()) != null) {
-                        writer.write(line);
-                        writer.newLine();
-                    }
-                    reader1.close();
-                    reader2.close();
-                    writer.close();
-
-                    System.out.println("Files have been concatenated to " + ResultFile);
-                } catch (IOException e) {
-                    System.err.println("An error occurred: " + e.getMessage());
+                if (newDirectory.mkdirs()) {
+                    System.out.println("Directory created successfully: " + newDirectory.getAbsolutePath());
+                } else {
+                    System.out.println("Failed to create the directory: " + newDirectory.getAbsolutePath());
                 }
-            } else {
-                System.out.println("The Files Do Not Exist");
             }
+
         }
     }
 
-    //Displays number of lines, words and characters.
-    public void wc(String[] args){
-        String filename = args[0];
-        int lineCount = 0;
-        int wordCount = 0;
-        int charCount = 0;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lineCount++;
-                charCount += line.length();
-                String[] words = line.split("\\s+");
-                wordCount += words.length;
-            }
-        } catch (IOException e) {
-            System.err.println("Error reading the file: " + e.getMessage());
-            return;
-        }
-
-        System.out.println(lineCount + " " + wordCount + " " + charCount + " " + filename);
-    }
-
-    //displays an enumerated list with the commands you’ve used in the past
-    public void history() {
+  //displays an enumerated list with the commands you’ve used in the past
+  public void history() {
         if (command_History.isEmpty()) {
             System.out.println("Command history is empty.");
             return;
@@ -183,11 +168,10 @@ public class Terminal {
         }
     }
 
-    public void chooseCommand() throws IOException {
+  public void chooseCommand() {
         String commandName = parser.getCommandName();
         String[] args = parser.getArgs();
-        Scanner scanner = new Scanner(System.in);
-
+       
         switch (commandName) {
             case "pwd":
                 pwd();
@@ -198,24 +182,23 @@ public class Terminal {
             case "ls":
                 ls();
                 break;
-            case "ls -r":
-                //listFilesReverse();
-                break;
             case "echo":
                 echo(args);
+                break;    
+            case "cp":  
+                cp(args);
+                break;   
+            case "touch":
+                touch(args);
                 break;
-            case "cp":
-                //cp();
+            case "mkdir":
+                mkdir(args);
                 break;
-            case "rm":
-                rm(args);
-                break;
-            case "cat":
-                cat(args);
-            case "wc":
-                wc(args);
             case "history":
                 history();
+                break; 
+            case "ls-r":
+                ls_r();
                 break;
             case "exit":
                 System.exit(0);
@@ -223,12 +206,12 @@ public class Terminal {
             default:
                 System.out.println("Command not valid");
         }
-        command_History.add(commandName); // Add the executed command to the history
+           command_History.add(commandName); // Add the executed command to the history
     }
 
-    // The main function to execute program
-    public static void main(String[] args) throws IOException {
-        com.mycompany.terminal.Terminal terminal = new com.mycompany.terminal.Terminal();
+  // The main function to execute program
+  public static void main(String[] args) { 
+        Terminal terminal = new Terminal();
         System.out.println("Choose The Command you need: ");
         Scanner scanner = new Scanner(System.in);
 
@@ -248,4 +231,3 @@ public class Terminal {
         }
     }
 }
-
